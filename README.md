@@ -1,4 +1,4 @@
-# Text Summarizer
+![Screenshot 2025-05-03 at 13-07-05 Text Summarization Tool](https://github.com/user-attachments/assets/da50b20c-24cb-4c83-ac19-4289fbafd491)
 
 A comprehensive text summarization tool that implements three different approaches to summarize text:
 

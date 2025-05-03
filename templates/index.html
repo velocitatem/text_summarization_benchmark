@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Summarization Tool</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 12px 20px;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        textarea:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .summary-box {
+            flex: 1;
+            min-width: 300px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .summary-box h2 {
+            color: #3498db;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .options {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        label {
+            margin-right: 5px;
+            font-weight: 500;
+        }
+        input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 60px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 5px solid #3498db;
+        }
+        .comparison {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .comparison h2 {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .comparison strong {
+            color: #3498db;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .method-explanation {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            border-left: 4px solid #e74c3c;
+            background-color: #fadbd8;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text Summarization Tool</h1>
+    
+    <textarea id="input-text" placeholder="Enter or paste text to summarize..."></textarea>
+    
+    <div class="options">
+        <div>
+            <label for="num-sentences">Sentences for extractive summary:</label>
+            <input type="number" id="num-sentences" min="1" max="10" value="3">
+        </div>
+        
+        <div>
+            <label for="max-length">Max length for generated summaries:</label>
+            <input type="number" id="max-length" min="50" max="500" value="150">
+        </div>
+        
+        <button id="summarize-btn">Summarize</button>
+    </div>
+    
+    <div id="error-message" class="error"></div>
+    
+    <div id="loading" class="loading">
+        <p>Generating summaries... This may take a moment.</p>
+    </div>
+    
+    <div class="container">
+        <div class="summary-box">
+            <h2>Extractive Summary (TextRank)</h2>
+            <p id="extractive-summary"></p>
+        </div>
+        
+        <div class="summary-box">
+            <h2>Seq2Seq Summary (T5)</h2>
+            <p id="seq2seq-summary"></p>
+        </div>
+        
+        <div class="summary-box">
+            <h2>Fine-tuned Summary (BART)</h2>
+            <p id="bart-summary"></p>
+        </div>
+    </div>
+    
+    <div class="comparison">
+        <h2>Understanding the Different Summarization Methods</h2>
+        
+        <div class="method-explanation">
+            <strong>Extractive Summarization (TextRank):</strong> 
+            <p>This method selects existing sentences from the text based on their importance. It uses a graph-based ranking algorithm (similar to Google's PageRank) to identify the most central sentences in the text. The advantage is that it preserves the original wording, but it may miss connections between ideas.</p>
+        </div>
+        
+        <div class="method-explanation">
+            <strong>Seq2Seq Summarization (T5):</strong>
+            <p>This is a generative approach that uses the T5 (Text-To-Text Transfer Transformer) model to create new text that summarizes the content. T5 treats every NLP task as a text-to-text problem, allowing it to generate summaries that may rephrase or combine ideas from the original text.</p>
+        </div>
+        
+        <div class="method-explanation">
+            <strong>Fine-tuned Summarization (BART):</strong>
+            <p>BART (Bidirectional and Auto-Regressive Transformers) is a state-of-the-art model pre-trained specifically for text generation tasks. The version used here has been fine-tuned on CNN/DailyMail news articles, making it particularly good at summarizing news and informational content.</p>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Text Summarization Tool - Comparing extractive and abstractive summarization approaches</p>
+    </footer>
+    
+    <script>
+        document.getElementById('summarize-btn').addEventListener('click', async function() {
+            const text = document.getElementById('input-text').value.trim();
+            if (!text) {
+                document.getElementById('error-message').textContent = 'Please enter some text to summarize';
+                document.getElementById('error-message').style.display = 'block';
+                return;
+            }
+            
+            // Clear error message if it was previously shown
+            document.getElementById('error-message').style.display = 'none';
+            
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
+            
+            // Clear previous summaries
+            document.getElementById('extractive-summary').textContent = 'Generating...';
+            document.getElementById('seq2seq-summary').textContent = 'Generating...';
+            document.getElementById('bart-summary').textContent = 'Generating...';
+            
+            const numSentences = document.getElementById('num-sentences').value;
+            const maxLength = document.getElementById('max-length').value;
+            
+            try {
+                const response = await fetch('/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        num_sentences: numSentences,
+                        max_length: maxLength
+                    }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                document.getElementById('extractive-summary').textContent = result.extractive_summary;
+                document.getElementById('seq2seq-summary').textContent = result.seq2seq_summary;
+                document.getElementById('bart-summary').textContent = result.bart_summary;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('error-message').textContent = 'An error occurred while summarizing. Please try again.';
+                document.getElementById('error-message').style.display = 'block';
+                
+                // Clear the loading placeholders
+                document.getElementById('extractive-summary').textContent = '';
+                document.getElementById('seq2seq-summary').textContent = '';
+                document.getElementById('bart-summary').textContent = '';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> 
